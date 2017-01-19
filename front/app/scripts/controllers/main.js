@@ -56,6 +56,7 @@ angular.module('BabarApp')
 		if(pk) {
 			API.getProduct(pk).then(function(res) {
 				$scope.main.product = res.data;
+				$scope.main.product.quantity = 1;
 			});
 		}
 		else {
@@ -89,21 +90,39 @@ angular.module('BabarApp')
 	this.makePurchase = function() {
 		var confirm = $mdDialog.confirm({
 			title: 'Make the purchase?',
-			textContent: $scope.main.customer.nickname + ': ' + $scope.main.product.name,
+			textContent: $scope.main.customer.nickname + ': ' + $scope.main.product.name + ' x' + $scope.main.product.quantity,
 			ok: 'Yes',
 			cancel: 'No',
 		});
 		$mdDialog.show(confirm).then(function() {
+			var n = 1;
+			if($scope.main.product.quantity)
+				n = $scope.main.product.quantity;
+			var i = 0;
+			var func_ok = function() {
+				i += 1;
+				if(i == n) {
+					$scope.main.unsetProduct();
+					$scope.main.reloadCustomer();
+					$mdToast.showSimple('Purchased');
+				} else {
+					API.postPurchase(
+						$scope.main.customer.pk,
+						$scope.main.product.pk
+					).then(func_ok, function(res) {
+						onError(res);
+						$scope.main.unsetProduct();
+						$scope.main.reloadCustomer();
+					});
+				}
+			}
 			API.postPurchase(
 				$scope.main.customer.pk,
 				$scope.main.product.pk
-			).then(function() {
-				// OK
+			).then(func_ok, function(res) {
+				onError(res);
 				$scope.main.unsetProduct();
 				$scope.main.reloadCustomer();
-				$mdToast.showSimple('Purchased');
-			}, function(res) {
-				onError(res);
 			});
 		}, function() {
 			onCancel();

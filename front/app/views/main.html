@@ -45,18 +45,21 @@
 			</md-autocomplete>
 		</div>
 
-		<div flex layout="column" layout-align="center" layout-margin>
+		<div flex layout="row" layout-align="center" layout-margin>
 			<md-autocomplete
 				md-items="product in main.products | fuzzy:main.productSearchText:false:true"
 				md-search-text="main.productSearchText"
 				md-item-text="product.name"
 				md-selected-item-change="main.paymentIsOpen = false; main.setProduct(product.pk)"
 				md-autoselect="true"
-				placeholder="Product name?">
+				placeholder="Product name?" flex="90">
 				<span>{{product.name}}</span>
 			</md-autocomplete>
+			<md-input-container>
+			  <label>Quantity</label>
+			  <input type="number" ng-model="main.product.quantity" min="1" max="24" value="1" placeholder="1"/>
+</md-input-container>
 		</div>
-
 		<div flex layout="column" layout-align="center center" layout-margin>
 			<md-button
 				ng-disabled="!main.customer || !main.product"
@@ -123,7 +126,7 @@
 				ng-show="main.product && !main.paymentIsOpen"
 				layout="column"
 				layout-align="center center">
-				<span>{{main.product.name}} {{main.product.price}}€</span>
+				<span>{{main.product.name}} x{{main.product.quantity}} {{100 * main.product.price * main.product.quantity / 100}}€</span>
 			</md-content>
 
 			<form
